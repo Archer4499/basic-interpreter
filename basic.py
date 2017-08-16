@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import operator
 import sys
@@ -152,7 +152,7 @@ class Statements:
                 value = lookup(self.value, var_dict)
             except:
                 raise
-            print value
+            print(value)
             return None, None
 
     class IF:
@@ -196,7 +196,7 @@ class Line:
         if self.content[0].isdigit():
             self.line_no = int(self.content[0])
         else:
-            print "The line containing \"" + string.strip() + "\" does not have a valid line number"
+            print("The line containing \"" + string.strip() + "\" does not have a valid line number")
             sys.exit(1)
 
         # Searches the Statements class for a class with the same name as the given statement
@@ -205,10 +205,10 @@ class Line:
             try:
                 self.statement = StatementClass(self.content[2:])
             except StatementError:
-                print "Error parsing statement on line:", self.line_no
+                print("Error parsing statement on line:", self.line_no)
                 sys.exit(1)
         else:
-            print "Invalid statement name on line:", self.line_no
+            print("Invalid statement name on line:", self.line_no)
             sys.exit(1)
 
     def __str__(self):
@@ -222,10 +222,10 @@ class Line:
         try:
             return self.statement.run(var_dict)
         except VariableError:
-            print "Invalid variable name on line:", self.line_no
+            print("Invalid variable name on line:", self.line_no)
             sys.exit(1)
         except EvalError:
-            print "Error evaluating expression on line:", self.line_no
+            print("Error evaluating expression on line:", self.line_no)
             sys.exit(1)
 
 
@@ -240,7 +240,7 @@ def parse_input(data):
         if curr_line.line_no not in parsed_dict:
             parsed_dict[curr_line.line_no] = curr_line
         else:
-            print "Multiple lines with same line number:", curr_line.line_no
+            print("Multiple lines with same line number:", curr_line.line_no)
             sys.exit(1)
     return parsed_dict
 
@@ -261,7 +261,7 @@ def run_code(code_dict):
             try:
                 i = index.index(new_line)
             except ValueError:
-                print "Invalid GOTO target on line:", code_dict[index[i]].line_no
+                print("Invalid GOTO target on line:", code_dict[index[i]].line_no)
                 sys.exit(1)
         else:
             i += 1
@@ -272,10 +272,10 @@ def print_code_inorder(code_dict):
     Prints the given BASIC code ordered by line numbers
     :param code_dict: (dict of line_no: Line): Parsed BASIC code
     """
-    print "## BASIC Code ##"
+    print("## BASIC Code ##")
     for key in sorted(code_dict.keys()):
-        print code_dict[key]
-    print "## END ##"
+        print(code_dict[key])
+    print("## END ##")
 
 
 if __name__ == '__main__':
@@ -293,10 +293,10 @@ if __name__ == '__main__':
             with open(sys.argv[1], "r") as f:
                 code = parse_input(f)
         except IOError:
-            print "Given argument is not a file"
+            print("Given argument is not a file")
             sys.exit(2)
     else:
-        print "Too many arguments"
+        print("Too many arguments")
         sys.exit(2)
 
     # print_code_inorder(code)
