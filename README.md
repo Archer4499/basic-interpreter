@@ -4,7 +4,7 @@ An interpreter built in Python 3 for a simplified version of BASIC
 Takes code from a specified file argument or from stdin
 
 Supports:
-* Operators: +,-,==,>
+* Operators: "+"|"-"|"*"|"/"|"%"|"^"|"=="|">"|"<"|">="|"<="|"!="
 * REM: comment
 * LET: assignment
 * GOTO: goto

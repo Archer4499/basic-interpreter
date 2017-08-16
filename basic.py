@@ -38,14 +38,19 @@ def lookup(var, var_dict):
 
 def evaluate(exp, var_dict):
     """
-    :param exp: [value, "+"|"-"|"=="|">", value]
+    :param exp: [value, "+"|"-"|"*"|"/"|"%"|"^"|"=="|">"|"<"|">="|"<="|"!=", value]
     :param var_dict: (dict of var_name: value): Dict of current variables and values
     :return: value
     :raises EvalError: if given operator is not valid
     :raises VariableError: if var lookup fails
     """
     # String operations work for all except "-"
-    operators = {"+": operator.add, "-": operator.sub, "==": operator.eq, ">": operator.gt}
+    operators = {"+": operator.add,  "-": operator.sub,
+                 "*": operator.mul,  "/": operator.floordiv,
+                 "%": operator.mod,  "^": operator.pow,
+                 "==": operator.eq,  ">": operator.gt,
+                 "<": operator.lt,  ">=": operator.ge,
+                 "<=": operator.le, "!=": operator.ne}
 
     if len(exp) is not 3:
         raise EvalError
@@ -191,7 +196,7 @@ class Line:
         :param string: A line of BASIC code
         """
         # Allow quoted strings
-        self.content = re.findall(r"([^\s\"]+|\".*?\")", string.strip())
+        self.content = re.findall(r"([^\s\"]+|\".*?\")", string)
 
         if self.content[0].isdigit():
             self.line_no = int(self.content[0])
@@ -236,12 +241,14 @@ def parse_input(data):
     """
     parsed_dict = dict()
     for line in data:
-        curr_line = Line(line)
-        if curr_line.line_no not in parsed_dict:
-            parsed_dict[curr_line.line_no] = curr_line
-        else:
-            print("Multiple lines with same line number:", curr_line.line_no)
-            sys.exit(1)
+        line = line.strip()
+        if line:  # Ignore blank lines
+            curr_line = Line(line)
+            if curr_line.line_no not in parsed_dict:
+                parsed_dict[curr_line.line_no] = curr_line
+            else:
+                print("Multiple lines with same line number:", curr_line.line_no)
+                sys.exit(1)
     return parsed_dict
 
 
