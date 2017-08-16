@@ -81,7 +81,10 @@ class Statements:
             """
             :param data: [comment string]
             """
-            self.comment = data[0]
+            if data:
+                self.comment = data[0]
+            else:
+                self.comment = ""
 
         @staticmethod
         def run(_):
@@ -188,6 +191,52 @@ class Statements:
                 raise
             return value, None
 
+    class GOSUB:
+        def __init__(self, data):
+            """
+            :param data: [value]
+            :raises StatementError: If content of statement is invalid
+            """
+            if len(data) is not 1:
+                raise StatementError
+            self.value = data[0]
+
+        def run(self, var_dict):
+            """
+            :param var_dict: (dict of var_name: value): Dict of current variables and values
+            :return: line number of GOSUB target, None
+            :raises VariableError: if var lookup fails
+            """
+            try:
+                value = lookup(self.value, var_dict)
+            except:
+                raise
+            return value, None
+
+    class RETURN:
+        def __init__(self, data):
+            """
+            :param data: empty
+            """
+            if data:
+                raise StatementError
+
+        @staticmethod
+        def run(_):
+            return None, None
+
+    class END:
+        def __init__(self, data):
+            """
+            :param data: empty
+            """
+            if data:
+                raise StatementError
+
+        @staticmethod
+        def run(_):
+            return None, None
+
 
 class Line:
     def __init__(self, string):
@@ -258,20 +307,40 @@ def run_code(code_dict):
     :param code_dict: (dict of line_no: Line): Parsed BASIC code
     """
     var_dict = dict()
+    gosub_return_stack = []
     index = sorted(code_dict.keys())
     i = 0
+
     while i < len(index):
-        new_line, new_var = code_dict[index[i]].run(var_dict)
-        if new_var:
-            var_dict[new_var[0]] = new_var[1]
-        if new_line is not None:
-            try:
-                i = index.index(new_line)
-            except ValueError:
-                print("Invalid GOTO target on line:", code_dict[index[i]].line_no)
+        curr_line = code_dict[index[i]]
+
+        # Finish executing code when the end statement is encountered
+        if isinstance(curr_line.statement, Statements.END):
+            break
+
+        elif isinstance(curr_line.statement, Statements.RETURN):
+            # Go to line after the last gosub when return is executed
+            if len(gosub_return_stack) > 0:
+                i = gosub_return_stack.pop() + 1
+            else:
+                print("Error: tried returning outside gosub on line:", curr_line.line_no)
                 sys.exit(1)
+
         else:
-            i += 1
+            if isinstance(curr_line.statement, Statements.GOSUB):
+                gosub_return_stack.append(i)
+
+            new_line, new_var = curr_line.run(var_dict)
+            if new_var:
+                var_dict[new_var[0]] = new_var[1]
+            if new_line is not None:
+                try:
+                    i = index.index(new_line)
+                except ValueError:
+                    print("Invalid GOTO/GOSUB target on line:", curr_line.line_no)
+                    sys.exit(1)
+            else:
+                i += 1
 
 
 def print_code_inorder(code_dict):
@@ -304,6 +373,7 @@ if __name__ == '__main__':
             sys.exit(2)
     else:
         print("Too many arguments")
+        print("Usage:", sys.argv[0], "filename")
         sys.exit(2)
 
     # print_code_inorder(code)

@@ -10,6 +10,8 @@ Supports:
 * GOTO: goto
 * PRINT: print
 * IF: conditional goto
+* GOSUB/RETURN: function call
+* END: finish executing
 
 <br/><br/><br/>
 State as previously submitted to Monash University:
